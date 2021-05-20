@@ -18,11 +18,11 @@
 #' getBeds(codes = c("BE", "FR"), dates = c("2021-01-03", "2021-01-04"), indicator = "icu")
 
 getBeds <- function(codes = NULL, dates = NULL, indicator = NULL) {
-
+  
   # Parameters
   ## Codes
   if (is.null(codes) == FALSE) {
-    country <- countrycode::countrycode(codes, origin = 'iso2c', destination = 'country.name')
+    country <- countrycode(codes, origin = 'iso2c', destination = 'country.name')
   }
   ## Indicators
   if (is.null(indicator) == FALSE) {
@@ -36,35 +36,39 @@ getBeds <- function(codes = NULL, dates = NULL, indicator = NULL) {
       indicator <- "Weekly new hospital admissions per 100k"
     }
   }
-
+  
   # URL
   url <- "https://opendata.ecdc.europa.eu/covid19/hospitalicuadmissionrates/json/"
-
+  
   # Get data
   jsonFile <- as.data.frame(jsonlite::fromJSON(url))
-
+  
+  # Renaming jsonFile's colums to avoid conflict
+  colnames(jsonFile)[1] <- "countryname"
+  colnames(jsonFile)[2] <- "indic"
+  
   # Filter
   if (missing(codes) && missing(dates) && missing(indicator)) {
     results <- jsonFile
   } else if (missing(dates) && missing(indicator)) {
-    results <- dplyr::filter(jsonFile, jsonFile[1] == country)
+    results <- filter(jsonFile, countryname == country)
   } else if (missing(codes) && missing(indicator)) {
-    results <- dplyr::filter(jsonFile, date %in% as.character(dates))
+    results <- filter(jsonFile, date %in% as.character(dates))
   } else if (missing(codes) && missing(dates)) {
-    results <- dplyr::filter(jsonFile, jsonFile[2] == indicator)
+    results <- filter(jsonFile, indic == indicator)
   } else if (missing(indicator)) {
-    y <- dplyr::filter(jsonFile, jsonFile[1] == country)
-    results <- dplyr::filter(y, date %in% as.character(dates))
+    y <- filter(jsonFile, countryname == country)
+    results <- filter(y, date %in% as.character(dates))
   } else if (missing(dates)) {
-    results <- dplyr::filter(jsonFile, jsonFile[1] %in% country, jsonFile[2] == indicator)
+    results <- filter(jsonFile, countryname %in% country, indic == indicator)
   } else if (missing(codes)) {
-    y <- dplyr::filter(jsonFile, jsonFile[2] == indicator)
-    results <- dplyr::filter(y, date %in% as.character(dates))
+    y <- filter(jsonFile, indic == indicator)
+    results <- filter(y, date %in% as.character(dates))
   } else {
-    y <- dplyr::filter(jsonFile, jsonFile[1] %in% country, jsonFile[2] == indicator)
-    results <- dplyr::filter(y, date %in% as.character(dates))
+    y <- filter(jsonFile, countryname %in% country, indic == indicator)
+    results <- filter(y, date %in% as.character(dates))
   }
-
+  
   # Removing useless columns
   results <- subset(results, select = -c(5, 6))
   # Renaming columns
@@ -72,7 +76,7 @@ getBeds <- function(codes = NULL, dates = NULL, indicator = NULL) {
   colnames(results) <- colnames
   # Data types
   results$date <- as.Date(results$date)
-
+  
   # Return results
   return(results)
 }

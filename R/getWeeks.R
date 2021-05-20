@@ -11,35 +11,35 @@
 #' getWeeks(dates = c("1962-03-26", "1966-10-06", "1998-07-21", "2000-03-08"), sym = FALSE)
 
 getWeeks <- function (dates, sym = TRUE) {
-
+  
   # Create vector
   results <- NULL
-
+  
   # List days between dates
   if (sym == TRUE) {
     for (i in 1:length(dates)) {
-      if (as.numeric(lubridate::isoweek(dates[i]) < 9)) {
-        week <- paste("0", lubridate::isoweek(dates[i]), sep = "")
+      if (as.numeric(isoweek(dates[i]) < 9)) {
+        week <- paste("0", isoweek(dates[i]), sep = "")
       } else {
-        week <- lubridate::isoweek(dates[i])
+        week <- isoweek(dates[i])
       }
-      year <- lubridate::isoyear(dates[i])
+      year <- isoyear(dates[i])
       results <- append(results, paste(year, "-W", week, sep = ""), after = length(results))
     }
   } else {
     for (i in 1:length(dates)) {
-      if (as.numeric(lubridate::isoweek(dates[i]) < 9)) {
-        week <- paste("0", lubridate::isoweek(dates[i]), sep = "")
+      if (as.numeric(isoweek(dates[i]) < 9)) {
+        week <- paste("0", isoweek(dates[i]), sep = "")
       } else {
-        week <- lubridate::isoweek(dates[i])
+        week <- isoweek(dates[i])
       }
-      year <- lubridate::isoyear(dates[i])
+      year <- isoyear(dates[i])
       results <- append(results, paste(year, "-", week, sep = ""), after = length(results))
     }
   }
-
+  
   results <- unique(results)
-
+  
   # Return results
   return(results)
 }
