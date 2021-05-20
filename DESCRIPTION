@@ -1,0 +1,24 @@
+Package: EuroCovTrackeR
+Title: Import Data About the COVID-19 Pandemic From the ECDC
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Nathanael G.",
+           family = "Durst",
+           role = c("aut", "cre"),
+           email = "nathanael.duerst@etu.unige.ch")
+Description: Import data about the COVID-19 pandemic from the European Centre for Disease Prevention and Control such as the number of cases, the number of vaccine doses received etc. 
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Imports:
+  jsonlite,
+  dplyr,
+  lubridate,
+  countrycode,
+  curl
