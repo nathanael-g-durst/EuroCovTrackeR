@@ -16,34 +16,35 @@
 #' getMeasures(codes = c("CH", "AT", "FR"), measure = "MassGatherAll", dates = "2020-03-01")
 
 getMeasures <- function(codes = NULL, measure = NULL, dates = NULL) {
-  
+
   # Parameters
   ## Codes
-  country <- countrycode(codes, origin = 'iso2c', destination = 'country.name')
-  
+  if (is.null(codes) == FALSE) {
+    country <- countrycode::countrycode(codes, origin = 'iso2c', destination = 'country.name')
+  }
   # Get latest data
   options(warn = -1)
-  
+
   i <- 0
-  
+
   while (exists("csvFile") == FALSE) {
-    
+
     skip <- FALSE
-    
+
     date <- as.character(Sys.Date()-i)
-    
+
     ## URL
     url <- paste("https://www.ecdc.europa.eu/sites/default/files/documents/response_graphs_data_", date, ".csv", sep = "")
-    
+
     ## Get data
-    tryCatch(csvFile <- read.csv(url), error = function(e) { skip <<- TRUE})
-    
+    tryCatch(csvFile <- utils::read.csv(url), error = function(e) { skip <<- TRUE})
+
     i <- i+1
-    
+
   }
-  
+
   options(warn = 0)
-  
+
   # Data frame
   ## Duration
   if (is.null(dates) == FALSE) {
@@ -53,44 +54,44 @@ getMeasures <- function(codes = NULL, measure = NULL, dates = NULL) {
         results <- seq(as.Date(csvFile$date_start[i]), as.Date(csvFile$date_end[i]), by="days")
         # Append
         csvFile$duration[i] <- list(results)
-        
+
       } else {
         csvFile$duration[i] <- NA
       }
     }
   }
-  
+
   # Filter
-  if (missing(country) && missing(dates) && missing(measure)) {
+  if (missing(codes) && missing(dates) && missing(measure)) {
     results <- csvFile
   } else if (missing(dates) && missing(measure)) {
-    results <- filter(csvFile, Country %in% country)
-  } else if (missing(country) && missing(dates)) {
-    results <- filter(csvFile, Response_measure == measure)
+    results <- dplyr::filter(csvFile, csvFile[1] %in% country)
+  } else if (missing(codes) && missing(dates)) {
+    results <- dplyr::filter(csvFile, csvFile[2] %in% measure)
   } else if (missing(dates)) {
-    results <- filter(csvFile, Country %in% country, Response_measure == measure)
+    results <- dplyr::filter(csvFile, csvFile[1] %in% country, csvFile[2] %in% measure)
   }
-  
+
   options(warn = -1)
-  
+
   if (missing(dates) == FALSE) {
     y <- mapply(`%in%`, dates, csvFile$duration)
-    if (missing(country) == FALSE && missing(measure) == FALSE) {
+    if (missing(codes) == FALSE && missing(measure) == FALSE) {
       x <- subset(csvFile, y)
-      results <- filter(x, Country %in% country, Response_measure == measure)
-    } else if (missing(country) == TRUE && missing(measure) == FALSE) {
+      results <- dplyr::filter(x, csvFile[1] %in% country, csvFile[2] %in% measure)
+    } else if (missing(codes) == TRUE && missing(measure) == FALSE) {
       x <- subset(csvFile, y)
-      results <- filter(x, Response_measure == measure)
-    } else if (missing(country) == FALSE && missing(measure) == TRUE) {
+      results <- dplyr::filter(x, csvFile[2] %in% measure)
+    } else if (missing(codes) == FALSE && missing(measure) == TRUE) {
       x <- subset(csvFile, y)
-      results <- filter(x, Country %in% country)
-    } else if (missing(country) == TRUE && missing(measure) == TRUE) {
+      results <- dplyr::filter(x, csvFile[1] %in% country)
+    } else if (missing(codes) == TRUE && missing(measure) == TRUE) {
       results <- subset(csvFile, y)
     }
   }
-  
+
   options(warn = 0)
-  
+
   # Removing useless columns
   results <- subset(results, select = -5)
   # Renaming columns
@@ -99,7 +100,7 @@ getMeasures <- function(codes = NULL, measure = NULL, dates = NULL) {
   # Data types
   results$startDate <- as.Date(results$startDate)
   results$endDate <- as.Date(results$endDate)
-  
+
   # Return results
   return(results)
 }

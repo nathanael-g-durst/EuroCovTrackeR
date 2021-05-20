@@ -17,48 +17,48 @@
 #' endDate = "2021-01-01"), var = "Other")
 
 getVariants <- function(codes = NULL, dates = NULL, var = NULL) {
-  
+
   # Parameters
   ## Week
   if (is.null(dates) == FALSE) {
     week <- getWeeks(dates = dates, sym = FALSE)
   }
-  
+
   # URL
   url <- "https://opendata.ecdc.europa.eu/covid19/virusvariant/json"
-  
+
   # Get data
   jsonFile <- as.data.frame(jsonlite::fromJSON(url))
-  
+
   # Filter
   if (missing(codes) && missing(dates) && missing(var)) {
     results <- jsonFile
   } else if (missing(dates) && missing(var)) {
-    results <- filter(jsonFile, country_code %in% codes)
+    results <- dplyr::filter(jsonFile, jsonFile$country_code %in% codes)
   } else if (missing(codes) && missing(var)) {
-    results <- filter(jsonFile, year_week %in% week)
+    results <- dplyr::filter(jsonFile, jsonFile[3] %in% week)
   } else if (missing(codes) && missing(dates)) {
-    results <- filter(jsonFile, variant == var)
+    results <- dplyr::filter(jsonFile, jsonFile$jsonFile$variant == var)
   } else if (missing(var)) {
-    y <- filter(jsonFile, country_code %in% codes)
-    results <- filter(y, year_week %in% week)
+    y <- dplyr::filter(jsonFile, jsonFile$country_code %in% codes)
+    results <- dplyr::filter(y, jsonFile[3] %in% week)
   } else if (missing(dates)) {
-    results <- filter(jsonFile, country_code %in% codes, variant == var)
+    results <- dplyr::filter(jsonFile, jsonFile$country_code %in% codes, jsonFile$jsonFile$variant == var)
   } else if (missing(codes)) {
-    y <- filter(jsonFile, variant == var)
-    results <- filter(y, year_week %in% week)
+    y <- dplyr::filter(jsonFile, jsonFile$variant == var)
+    results <- dplyr::filter(y, jsonFile[3] %in% week)
   } else {
-    y <- filter(jsonFile, country_code %in% codes, variant == var)
-    results <- filter(y, year_week %in% week)
+    y <- dplyr::filter(jsonFile, jsonFile$country_code %in% codes, jsonFile$variant == var)
+    results <- dplyr::filter(y, jsonFile[3] %in% week)
   }
-  
+
   # Removing useless columns
   results <- subset(results, select = -c(2,4))
   # Renaming columns
   colnames <- c("country", "week", "newCases", "testSequenced", "percentSequenced", "validDenominator",
                 "variant", "numberDetected", "percentVariant")
   colnames(results) <- colnames
-  
+
   # Return results
   return(results)
 }
