@@ -33,11 +33,11 @@ getCovid <- function(codes = NULL, dates = NULL) {
   if (missing(codes) && missing(dates)) {
     results <- jsonFile
   } else if (missing(dates)) {
-    results <- dplyr::filter(jsonFile, jsonFile$records.geoId == codes)
+    results <- dplyr::filter(jsonFile, jsonFile[,8] %in% codes)
   } else if (missing(codes)) {
     results <- jsonFile[jsonFile$records.dateRep >= dates[1] & jsonFile$records.dateRep <= dates[length(dates)],]
   } else {
-    results <- dplyr::filter(jsonFile, jsonFile$records.geoId == codes)
+    results <- dplyr::filter(jsonFile, jsonFile[,8] %in% codes)
     results <- results[results$records.dateRep >= dates[1] & results$records.dateRep <= dates[length(dates)],]
   }
 
