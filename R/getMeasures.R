@@ -20,7 +20,7 @@ getMeasures <- function(codes = NULL, measure = NULL, dates = NULL) {
   # Parameters
   ## Codes
   if (is.null(codes) == FALSE) {
-    country <- countrycode::countrycode(codes, origin = 'iso2c', destination = 'country.name')
+    codes <- countrycode::countrycode(codes, origin = 'iso2c', destination = 'country.name')
   }
   # Get latest data
   options(warn = -1)
@@ -49,7 +49,7 @@ getMeasures <- function(codes = NULL, measure = NULL, dates = NULL) {
   ## Duration
   if (is.null(dates) == FALSE) {
     for (i in 1:length(csvFile[,1])) {
-      if (is.na(csvFile$date_start[i]) == FALSE && is.na(csvFile$date_end[i]) == FALSE) {
+      if (is.na(csvFile[i,3]) == FALSE && is.na(csvFile[i,4]) == FALSE) {
         # List days between dates
         results <- seq(as.Date(csvFile$date_start[i]), as.Date(csvFile$date_end[i]), by="days")
         # Append
@@ -62,30 +62,31 @@ getMeasures <- function(codes = NULL, measure = NULL, dates = NULL) {
   }
 
   # Filter
-  if (missing(codes) && missing(dates) && missing(measure)) {
+  if (is.null(codes) && missing(dates) && missing(measure)) {
     results <- csvFile
   } else if (missing(dates) && missing(measure)) {
-    results <- dplyr::filter(csvFile, csvFile[1] %in% country)
-  } else if (missing(codes) && missing(dates)) {
-    results <- dplyr::filter(csvFile, csvFile[2] %in% measure)
+    results <- dplyr::filter(csvFile, csvFile[,1] %in% codes)
+  } else if (is.null(codes) && missing(dates)) {
+    results <- dplyr::filter(csvFile, csvFile[,2] %in% measure)
   } else if (missing(dates)) {
-    results <- dplyr::filter(csvFile, csvFile[1] %in% country, csvFile[2] %in% measure)
+    results <- dplyr::filter(csvFile, csvFile[,1] %in% codes, csvFile[,2] %in% measure)
   }
 
   options(warn = -1)
 
   if (missing(dates) == FALSE) {
-    y <- mapply(`%in%`, dates, csvFile$duration)
-    if (missing(codes) == FALSE && missing(measure) == FALSE) {
+    y <- mapply(`%in%`, as.Date(dates), csvFile[,5])
+    if (is.null(codes) == FALSE && missing(measure) == FALSE) {
       x <- subset(csvFile, y)
-      results <- dplyr::filter(x, csvFile[1] %in% country, csvFile[2] %in% measure)
-    } else if (missing(codes) == TRUE && missing(measure) == FALSE) {
+      a <- dplyr::filter(x, x[,1] %in% codes)
+      results <- dplyr::filter(a, a[,2] %in% measure)
+    } else if (is.null(codes) == TRUE && missing(measure) == FALSE) {
       x <- subset(csvFile, y)
-      results <- dplyr::filter(x, csvFile[2] %in% measure)
-    } else if (missing(codes) == FALSE && missing(measure) == TRUE) {
+      results <- dplyr::filter(x, x[,2] %in% measure)
+    } else if (is.null(codes) == FALSE && missing(measure) == TRUE) {
       x <- subset(csvFile, y)
-      results <- dplyr::filter(x, csvFile[1] %in% country)
-    } else if (missing(codes) == TRUE && missing(measure) == TRUE) {
+      results <- dplyr::filter(x, x[,1] %in% codes)
+    } else if (is.null(codes) == TRUE && missing(measure) == TRUE) {
       results <- subset(csvFile, y)
     }
   }
