@@ -25,7 +25,7 @@ getBeds <- function(codes = NULL, dates = NULL, indicator = NULL) {
     codes <- countrycode::countrycode(codes, origin = 'iso2c', destination = 'country.name')
   }
   ## Indicators
-  indi <- NULL 
+  indic <- NULL 
   if (is.null(indicator) == FALSE) {
     if (indicator == "icu" || indicator == "ICU" || indicator == "Icu") {
       indic <- "Daily ICU occupancy"
