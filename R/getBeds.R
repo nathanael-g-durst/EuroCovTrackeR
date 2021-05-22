@@ -22,21 +22,22 @@ getBeds <- function(codes = NULL, dates = NULL, indicator = NULL) {
   # Parameters
   ## Codes
   if (is.null(codes) == FALSE) {
-    country <- countrycode::countrycode(codes, origin = 'iso2c', destination = 'country.name')
+    codes <- countrycode::countrycode(codes, origin = 'iso2c', destination = 'country.name')
   }
   ## Indicators
+  indi <- NULL 
   if (is.null(indicator) == FALSE) {
     if (indicator == "icu" || indicator == "ICU" || indicator == "Icu") {
-      indicator <- "Daily ICU occupancy"
+      indic <- "Daily ICU occupancy"
     } else if (indicator == "icuper" || indicator == "icuPer" || indicator == "ICUPer" || indicator == "ICUPER" || indicator == "ICUper") {
-      indicator <- "Weekly new ICU admissions per 100k"
+      indic <- "Weekly new ICU admissions per 100k"
     } else if (indicator == "hosp" || indicator == "Hosp" || indicator == "hospital" || indicator == "Hospital") {
-      indicator <- "Daily hospital occupancy"
+      indic <- "Daily hospital occupancy"
     } else if (indicator == "hospper" || indicator == "hospPer" || indicator == "HospPer" || indicator == "hospitalper" || indicator == "HospitalPer" || indicator == "HospitalPer") {
-      indicator <- "Weekly new hospital admissions per 100k"
+      indic <- "Weekly new hospital admissions per 100k"
     }
   }
-
+  
   # URL
   url <- "https://opendata.ecdc.europa.eu/covid19/hospitalicuadmissionrates/json/"
 
@@ -44,24 +45,24 @@ getBeds <- function(codes = NULL, dates = NULL, indicator = NULL) {
   jsonFile <- as.data.frame(jsonlite::fromJSON(url))
 
   # Filter
-  if (missing(codes) && missing(dates) && missing(indicator)) {
+  if (missing(codes) && missing(dates) && is.null(indic)) {
     results <- jsonFile
-  } else if (missing(dates) && missing(indicator)) {
-    results <- dplyr::filter(jsonFile, jsonFile[1] == country)
-  } else if (missing(codes) && missing(indicator)) {
+  } else if (missing(dates) && is.null(indic)) {
+    results <- dplyr::filter(jsonFile, jsonFile[,1] %in% codes)
+  } else if (missing(codes) && is.null(indic)) {
     results <- dplyr::filter(jsonFile, date %in% as.character(dates))
   } else if (missing(codes) && missing(dates)) {
-    results <- dplyr::filter(jsonFile, jsonFile[2] == indicator)
-  } else if (missing(indicator)) {
-    y <- dplyr::filter(jsonFile, jsonFile[1] == country)
+    results <- dplyr::filter(jsonFile, jsonFile[,2] %in% as.character(indic))
+  } else if (is.null(indic)) {
+    y <- dplyr::filter(jsonFile, jsonFile[,1] %in% codes)
     results <- dplyr::filter(y, date %in% as.character(dates))
   } else if (missing(dates)) {
-    results <- dplyr::filter(jsonFile, jsonFile[1] %in% country, jsonFile[2] == indicator)
+    results <- dplyr::filter(jsonFile, jsonFile[,1] %in% codes, jsonFile[2] == indic)
   } else if (missing(codes)) {
-    y <- dplyr::filter(jsonFile, jsonFile[2] == indicator)
+    y <- dplyr::filter(jsonFile, jsonFile[,2] == indic)
     results <- dplyr::filter(y, date %in% as.character(dates))
   } else {
-    y <- dplyr::filter(jsonFile, jsonFile[1] %in% country, jsonFile[2] == indicator)
+    y <- dplyr::filter(jsonFile, jsonFile[,1] %in% codes, jsonFile[2] == indic)
     results <- dplyr::filter(y, date %in% as.character(dates))
   }
 
