@@ -36,20 +36,21 @@ getVariants <- function(codes = NULL, dates = NULL, var = NULL) {
   } else if (missing(dates) && missing(var)) {
     results <- dplyr::filter(jsonFile, jsonFile$country_code %in% codes)
   } else if (missing(codes) && missing(var)) {
-    results <- dplyr::filter(jsonFile, jsonFile[3] %in% week)
+    results <- dplyr::filter(jsonFile, jsonFile[,3] %in% week)
   } else if (missing(codes) && missing(dates)) {
-    results <- dplyr::filter(jsonFile, jsonFile$jsonFile$variant == var)
+    results <- dplyr::filter(jsonFile, jsonFile[,9] %in% var)
   } else if (missing(var)) {
     y <- dplyr::filter(jsonFile, jsonFile$country_code %in% codes)
-    results <- dplyr::filter(y, jsonFile[3] %in% week)
+    results <- dplyr::filter(y, y[,3] %in% week)
   } else if (missing(dates)) {
-    results <- dplyr::filter(jsonFile, jsonFile$country_code %in% codes, jsonFile$jsonFile$variant == var)
+    results <- dplyr::filter(jsonFile, jsonFile$country_code %in% codes, jsonFile[,9] %in% var)
   } else if (missing(codes)) {
-    y <- dplyr::filter(jsonFile, jsonFile$variant == var)
-    results <- dplyr::filter(y, jsonFile[3] %in% week)
+    y <- dplyr::filter(jsonFile, jsonFile[,9] %in% var)
+    results <- dplyr::filter(y, y[,3] %in% week)
   } else {
-    y <- dplyr::filter(jsonFile, jsonFile$country_code %in% codes, jsonFile$variant == var)
-    results <- dplyr::filter(y, jsonFile[3] %in% week)
+    y <- dplyr::filter(jsonFile, jsonFile$country_code %in% codes)
+    z <- dplyr::filter(y, y[,9] %in% var)
+    results <- dplyr::filter(z, z[,3] %in% week)
   }
 
   # Removing useless columns
