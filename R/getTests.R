@@ -29,7 +29,7 @@ getTests <- function(codes = NULL, dates = NULL) {
   if (missing(codes) && missing(dates)) {
     results <- jsonFile
   } else if (missing(dates)) {
-    results <- dplyr::filter(jsonFile, jsonFile$country_code == codes)
+    results <- dplyr::filter(jsonFile, jsonFile$country_code %in% codes)
   } else if (missing(codes)) {
     results <- dplyr::filter(jsonFile, jsonFile[,3] %in% week)
   } else {
