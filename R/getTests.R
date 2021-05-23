@@ -31,10 +31,10 @@ getTests <- function(codes = NULL, dates = NULL) {
   } else if (missing(dates)) {
     results <- dplyr::filter(jsonFile, jsonFile$country_code == codes)
   } else if (missing(codes)) {
-    results <- dplyr::filter(jsonFile, jsonFile[3] %in% week)
+    results <- dplyr::filter(jsonFile, jsonFile[,3] %in% week)
   } else {
     y <- dplyr::filter(jsonFile, jsonFile$country_code %in% codes)
-    results <- dplyr::filter(y, jsonFile[3] %in% week)
+    results <- dplyr::filter(y, y[,3] %in% week)
   }
 
   # Selecting national data
