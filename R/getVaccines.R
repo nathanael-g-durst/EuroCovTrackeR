@@ -25,7 +25,7 @@ getVaccines <- function(codes = NULL, dates = NULL, vac = NULL, target = NULL) {
   # Parameters
   ## Week
   if (is.null(dates) == FALSE) {
-    week <- getWeeks(dates = dates, sym = TRUE)
+    dates <- getWeeks(dates = dates, sym = TRUE)
   }
 
   # URL
@@ -40,40 +40,48 @@ getVaccines <- function(codes = NULL, dates = NULL, vac = NULL, target = NULL) {
   } else if (missing(dates) && missing(vac) && missing(target)) {
     results <- dplyr::filter(jsonFile, jsonFile$records.ReportingCountry %in% codes)
   } else if (missing(codes) && missing(vac) && missing(target)) {
-    results <- dplyr::filter(jsonFile, jsonFile[1] %in% week)
+    results <- dplyr::filter(jsonFile, jsonFile[,1] %in% dates)
   } else if (missing(codes) && missing(dates) && missing(target)) {
-    results <- dplyr::filter(jsonFile, jsonFile$records.Vaccine == vac)
+    results <- dplyr::filter(jsonFile, jsonFile[,11] %in% vac)
   } else if (missing(codes) && missing(dates) && missing(vac)) {
-    results <- dplyr::filter(jsonFile, jsonFile$records.TargetGroup == target)
+    results <- dplyr::filter(jsonFile, jsonFile[,10] %in% target)
   } else if (missing(vac) && missing(target)) {
     y <- dplyr::filter(jsonFile, jsonFile$records.ReportingCountry %in% codes)
-    results <- dplyr::filter(y, jsonFile[1] %in% week)
+    results <- dplyr::filter(y, y[,1] %in% dates)
   } else if (missing(dates) && missing(target)) {
-    results <- dplyr::filter(jsonFile, jsonFile$records.ReportingCountry %in% codes, jsonFile$records.Vaccine == vac)
+    results <- dplyr::filter(jsonFile, jsonFile$records.ReportingCountry %in% codes, jsonFile[,11] %in% vac)
   } else if (missing(dates) && missing(vac)) {
-    results <- dplyr::filter(jsonFile, jsonFile$records.ReportingCountry %in% codes, jsonFile$records.TargetGroup == target)
+    y <-  subset(jsonFile, jsonFile[,9] %in% codes)
+    results <- dplyr::filter(y, y[,10] %in% target)
   } else if (missing(codes) && missing(target)) {
-    y <- dplyr::filter(jsonFile, jsonFile$records.Vaccine == vac)
-    results <- dplyr::filter(y, jsonFile[1] %in% week)
+    y <- subset(jsonFile, jsonFile[,1] %in% dates)
+    results <- dplyr::filter(y, y[,11] %in% vac)
   } else if (missing(codes) && missing(vac)) {
-    y <- dplyr::filter(jsonFile, jsonFile$records.TargetGroup == target)
-    results <- dplyr::filter(y, jsonFile[1] %in% week)
+    y <- subset(jsonFile, jsonFile[,1] %in% dates)
+    results <- dplyr::filter(y, y[,10] %in% target)
   } else if (missing(codes) && missing(dates)) {
-    results <- dplyr::filter(jsonFile, jsonFile$records.Vaccine == vac, jsonFile$records.TargetGroup == target)
+    results <- dplyr::filter(jsonFile, jsonFile[,11] %in% vac, jsonFile$records.TargetGroup == target)
   } else if (missing(target)) {
-    y <- dplyr::filter(jsonFile, jsonFile$records.ReportingCountry %in% codes, jsonFile$records.Vaccine == vac)
-    results <- dplyr::filter(y, jsonFile[1] %in% week)
+    y <- subset(jsonFile, jsonFile[,1] %in% dates)
+    z <- dplyr::filter(y, y[,9] %in% codes)
+    results <- dplyr::filter(z, z[,11] %in% vac)
   } else if (missing(vac)) {
-    y <- dplyr::filter(jsonFile, jsonFile$records.ReportingCountry %in% codes, jsonFile$records.TargetGroup == target)
-    results <- dplyr::filter(y, jsonFile[1] %in% week)
+    y <- subset(jsonFile, jsonFile[,1] %in% dates)
+    z <- dplyr::filter(y, y[,9] %in% codes)
+    results <- dplyr::filter(z, z[,10] %in% target)
   } else if (missing(dates)) {
-    results <- dplyr::filter(jsonFile, jsonFile$records.ReportingCountry %in% codes, jsonFile$records.Vaccine == vac, jsonFile$records.TargetGroup == target)
+    y <- dplyr::filter(jsonFile, jsonFile[,9] %in% codes)
+    z <- dplyr::filter(y, y[,11] %in% vac)
+    results <- dplyr::filter(z, z[,10] %in% target)
   } else if (missing(codes)) {
-    y <- dplyr::filter(jsonFile, jsonFile$records.Vaccine == vac, jsonFile$records.TargetGroup == target)
-    results <- dplyr::filter(y, jsonFile[1] %in% week)
+    y <- subset(jsonFile, jsonFile[,1] %in% dates)
+    z <- dplyr::filter(y, y[,11] %in% vac)
+    results <- dplyr::filter(z, z[,10] %in% target)
   } else {
-    y <- dplyr::filter(jsonFile, jsonFile$records.ReportingCountry %in% codes, jsonFile$records.Vaccine == vac, jsonFile$records.TargetGroup == target)
-    results <- dplyr::filter(y, jsonFile[1] %in% week)
+    y <- subset(jsonFile, jsonFile[,1] %in% dates)
+    z <- dplyr::filter(y, y[,11] %in% vac)
+    a <- dplyr::filter(z, z[,9] %in% codes)
+    results <- dplyr::filter(a, a[,10] %in% target)
   }
 
   # Selecting national data
