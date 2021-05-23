@@ -52,18 +52,20 @@ getBeds <- function(codes = NULL, dates = NULL, indicator = NULL) {
   } else if (missing(codes) && is.null(indic)) {
     results <- dplyr::filter(jsonFile, date %in% as.character(dates))
   } else if (missing(codes) && missing(dates)) {
-    results <- dplyr::filter(jsonFile, jsonFile[,2] %in% as.character(indic))
+    results <- dplyr::filter(jsonFile, jsonFile[,2] %in% indic)
   } else if (is.null(indic)) {
     y <- dplyr::filter(jsonFile, jsonFile[,1] %in% codes)
     results <- dplyr::filter(y, date %in% as.character(dates))
   } else if (missing(dates)) {
-    results <- dplyr::filter(jsonFile, jsonFile[,1] %in% codes, jsonFile[2] == indic)
+    y <- dplyr::filter(jsonFile, jsonFile[,1] %in% codes)
+    results <- dplyr::filter(y, y[,2] %in% indic)
   } else if (missing(codes)) {
-    y <- dplyr::filter(jsonFile, jsonFile[,2] == indic)
+    y <- dplyr::filter(jsonFile, jsonFile[,2] %in% indic)
     results <- dplyr::filter(y, date %in% as.character(dates))
   } else {
-    y <- dplyr::filter(jsonFile, jsonFile[,1] %in% codes, jsonFile[2] == indic)
-    results <- dplyr::filter(y, date %in% as.character(dates))
+    y <- dplyr::filter(jsonFile, jsonFile[,1] %in% codes)
+    z <- dplyr::filter(y, y[,2] %in% indic)
+    results <- dplyr::filter(z, date %in% as.character(dates))
   }
 
   # Removing useless columns
